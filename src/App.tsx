@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import "./app.css";
 
 import ItemsToggled from "./examples/items-toggled/App";
+import Todos from "./examples/todos/App";
+import MemoExample from "./examples/memo/App";
 
 type Example = {
   id: string;
@@ -18,6 +20,19 @@ const EXAMPLES: Example[] = [
       "Toggle theme → parent re-renders → List effect runs again (even if items didn’t change).",
     Component: ItemsToggled,
   },
+  {
+    id: "todos",
+    title: "Todos",
+    description:
+      "Derived state with useMemo; unrelated state changes should not affect todo selection.",
+    Component: Todos,
+  },
+  {
+    id: "memo",
+    title: "useMemo (expensive work + styles)",
+    description: "Expensive calculation runs only when number changes; styles object is memoized by theme.",
+    Component: MemoExample,
+  }
 ];
 
 const getHashId = (): string =>
