@@ -1,77 +1,79 @@
+import React, { useEffect, useState } from 'react';
 
-// src/App.js
-import React, { useCallback, useEffect, useState } from 'react'
-
-// Static data
 const TODOS = [
   { id: 0, content: 'You often feel completely overwhelmed' },
   { id: 1, content: 'You sometimes forget to do things that are important' },
   { id: 2, content: 'People have to chase you to get things done' },
   { id: 3, content: 'You find it a struggle to keep to deadlines' },
   { id: 4, content: "If the link in your email doesn't work" }
-]
+];
 
 export default function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+  const [otherState, setOtherState] = useState(false);
 
-  // Memoize the function so its identity only changes when `count` changes.
-  // Also guard the index with wrap-around to avoid out-of-bounds.
-  const getTodos = useCallback(() => {
-    const len = TODOS.length
-    if (len === 0) return null
-    const idx = ((count % len) + len) % len
-    return TODOS[idx]
-  }, [count])
+  // Without useCallback: This is a "new" function every single render
+  const getTodos = () => {
+    const len = TODOS.length;
+    const idx = ((count % len) + len) % len;
+    return TODOS[idx];
+  };
 
   return (
-    <div className="App" style={{ padding: 16, fontFamily: 'sans-serif' }}>
-      <h2>Todos (function-prop version)</h2>
+    <div style={{ padding: 24, fontFamily: 'system-ui, sans-serif', lineHeight: '1.5' }}>
+      <h1>Mentorship: The "Broken" Identity Lab</h1>
+      <p style={{ color: 'red' }}><strong>Note:</strong> useCallback is removed. Watch the console!</p>
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-        <button type="button" onClick={() => setCount(c => c + 1)}>+1</button>
-        <button type="button" onClick={() => setCount(c => c - 1)}>-1</button>
-        <span>count: {count}</span>
+      <div style={{ display: 'flex', gap: 20, marginBottom: 20 }}>
+        <div style={{ flex: 1, border: '2px solid #007bff', padding: 15, borderRadius: 8 }}>
+          <h3>1. Relevant State</h3>
+          <button onClick={() => setCount(c => c + 1)}>Count +1</button>
+          <p><strong>Count:</strong> {count}</p>
+        </div>
+
+        <div style={{ 
+          flex: 1, 
+          border: '2px solid #28a745', 
+          padding: 15, 
+          borderRadius: 8,
+          backgroundColor: otherState ? '#e6ffed' : 'transparent' 
+        }}>
+          <h3>2. Irrelevant State</h3>
+          <button onClick={() => setOtherState(s => !s)}>
+            Toggle UI Theme
+          </button>
+          <p><strong>Theme:</strong> {otherState ? 'Light Green' : 'Default'}</p>
+        </div>
       </div>
 
       <TodoSection getTodos={getTodos} />
     </div>
-  )
+  );
 }
 
 function TodoSection({ getTodos }) {
-  const [todos, setTodos] = useState([])
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const next = getTodos()
+    const next = getTodos();
+    if (!next) return;
 
-    setTodos(prev => {
-      if (!next) return prev
-      // Optional de-dup by id so cycling doesn't append the same item repeatedly
-      if (prev.some(t => t.id === next.id)) return prev
-      return [...prev, next]
-    })
+    setHistory(prev => {
+      if (prev.some(t => t.id === next.id)) return prev;
+      return [...prev, next];
+    });
 
-    console.log('getTodos function called')
-  }, [getTodos])
+    console.log('%c❌ Effect Triggered Unnecessarily!', 'color: red; font-weight: bold;');
+  }, [getTodos]);
 
   return (
-    <div>
-      {todos.length === 0 ? (
-        <p style={{ opacity: 0.7 }}>No items yet — click +1/-1 to add the current todo.</p>
-      ) : (
-        todos.map((todo, i) => (
-          <p key={`${todo.id}-${i}`}>{todo.content}</p>
-        ))
-      )}
-      {todos.length > 0 && (
-        <button
-          type="button"
-          onClick={() => setTodos([])}
-          style={{ marginTop: 8 }}
-        >
-          Reset list
-        </button>
-      )}
+    <div style={{ border: '1px solid #ddd', padding: 15, borderRadius: 8, background: '#f9f9f9' }}>
+      <h4>History:</h4>
+      <ul>
+        {history.map((todo) => (
+          <li key={todo.id}>{todo.content}</li>
+        ))}
+      </ul>
     </div>
-  )
+  );
 }
