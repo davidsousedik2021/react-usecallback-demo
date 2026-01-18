@@ -1,77 +1,77 @@
-import { useEffect, useMemo, useState } from "react";
 
-type Todo = {
-  id: number;
-  content: string;
-};
+// src/App.js
+import React, { useCallback, useEffect, useState } from 'react'
 
-const TODOS: Todo[] = [
-  { id: 0, content: "You often feel completely overwhelmed" },
-  { id: 1, content: "You sometimes forget to do things that are important" },
-  { id: 2, content: "People have to chase you to get things done" },
-  { id: 3, content: "You find it a struggle to keep to deadlines" },
-  { id: 4, content: "If the link in your email doesn't work" },
-];
+// Static data
+const TODOS = [
+  { id: 0, content: 'You often feel completely overwhelmed' },
+  { id: 1, content: 'You sometimes forget to do things that are important' },
+  { id: 2, content: 'People have to chase you to get things done' },
+  { id: 3, content: 'You find it a struggle to keep to deadlines' },
+  { id: 4, content: "If the link in your email doesn't work" }
+]
 
-export default function Todos(): JSX.Element {
-  console.log("Todos: App rendered");
+export default function App() {
+  const [count, setCount] = useState(0)
 
-  const [count, setCount] = useState<number>(0);
-  const [reverseCount, setReverseCount] = useState<number>(100);
-
-  // Only changes when `count` changes
-  const currentTodo = useMemo<Todo | null>(() => {
-    const len = TODOS.length;
-    if (len === 0) return null;
-
-    const idx = ((count % len) + len) % len;
-    return TODOS[idx];
-  }, [count]);
+  // Memoize the function so its identity only changes when `count` changes.
+  // Also guard the index with wrap-around to avoid out-of-bounds.
+  const getTodos = useCallback(() => {
+    const len = TODOS.length
+    if (len === 0) return null
+    const idx = ((count % len) + len) % len
+    return TODOS[idx]
+  }, [count])
 
   return (
-    <div style={{ padding: 16 }}>
-      <h3>Todos</h3>
+    <div className="App" style={{ padding: 16, fontFamily: 'sans-serif' }}>
+      <h2>Todos (function-prop version)</h2>
 
-      {/* Independent reverse counter */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <p style={{ margin: 0 }}>{reverseCount}</p>
-        <button onClick={() => setReverseCount(rc => rc - 1)}>
-          -1
-        </button>
-      </div>
-
-      {/* Counter that drives todo selection */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-        <button onClick={() => setCount(c => c + 1)}>+1</button>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+        <button type="button" onClick={() => setCount(c => c + 1)}>+1</button>
+        <button type="button" onClick={() => setCount(c => c - 1)}>-1</button>
         <span>count: {count}</span>
       </div>
 
-      <TodoSection todo={currentTodo} />
+      <TodoSection getTodos={getTodos} />
     </div>
-  );
+  )
 }
 
-type TodoSectionProps = {
-  todo: Todo | null;
-};
-
-function TodoSection({ todo }: TodoSectionProps): JSX.Element {
-  const [list, setList] = useState<Todo[]>([]);
+function TodoSection({ getTodos }) {
+  const [todos, setTodos] = useState([])
 
   useEffect(() => {
-    if (!todo) return;
+    const next = getTodos()
 
-    setList(prev => {
-      if (prev.some(t => t.id === todo.id)) return prev;
-      return [...prev, todo];
-    });
-  }, [todo]);
+    setTodos(prev => {
+      if (!next) return prev
+      // Optional de-dup by id so cycling doesn't append the same item repeatedly
+      if (prev.some(t => t.id === next.id)) return prev
+      return [...prev, next]
+    })
+
+    console.log('getTodos function called')
+  }, [getTodos])
 
   return (
-    <div style={{ marginTop: 12 }}>
-      {list.map(t => (
-        <p key={t.id}>{t.content}</p>
-      ))}
+    <div>
+      {todos.length === 0 ? (
+        <p style={{ opacity: 0.7 }}>No items yet — click +1/-1 to add the current todo.</p>
+      ) : (
+        todos.map((todo, i) => (
+          <p key={`${todo.id}-${i}`}>{todo.content}</p>
+        ))
+      )}
+      {todos.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setTodos([])}
+          style={{ marginTop: 8 }}
+        >
+          Reset list
+        </button>
+      )}
     </div>
-  );
+  )
 }
