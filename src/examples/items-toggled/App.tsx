@@ -2,13 +2,13 @@ import { useState } from "react";
 import List from "./List";
 
 export default function ItemsToggled(): JSX.Element {
-  console.log("ItemsToggled: App rendered");
+  //console.log("ItemsToggled: App rendered");
 
   const [number, setNumber] = useState<number>(1);
   const [dark, setDark] = useState<boolean>(false);
 
   const getItems = (): number[] => {
-    console.log("ItemsToggled: getItems called");
+    //console.log("ItemsToggled: getItems called");
     return [number, number + 1, number + 2];
   };
 
