@@ -4,6 +4,7 @@ import "./app.css";
 import ItemsToggled from "./examples/items-toggled/App";
 import Todos from "./examples/todos/App";
 import MemoExample from "./examples/memo/App";
+import UltimateTodos from "./examples/ultimate-todos/App";
 
 type Example = {
   id: string;
@@ -30,20 +31,25 @@ const EXAMPLES: Example[] = [
   {
     id: "memo",
     title: "useMemo (expensive work + styles)",
-    description: "Expensive calculation runs only when number changes; styles object is memoized by theme.",
+    description:
+      "Expensive calculation runs only when number changes; styles object is memoized by theme.",
     Component: MemoExample,
-  }
+  },
+  {
+    id: "ultimate-todos",
+    title: "Ultimate Todos",
+    description:
+      "Real-world app combining useState, useEffect, useCallback, useMemo, useRef and React.memo. Observe which changes cause re-renders and why.",
+    Component: UltimateTodos,
+  },
 ];
 
-const getHashId = (): string =>
-  window.location.hash.replace("#", "");
+const getHashId = (): string => window.location.hash.replace("#", "");
 
 export default function App(): JSX.Element {
   const [activeId, setActiveId] = useState<string>(() => {
     const fromHash = getHashId();
-    return EXAMPLES.some(e => e.id === fromHash)
-      ? fromHash
-      : EXAMPLES[0].id;
+    return EXAMPLES.some((e) => e.id === fromHash) ? fromHash : EXAMPLES[0].id;
   });
 
   // sync URL hash
@@ -55,7 +61,7 @@ export default function App(): JSX.Element {
   useEffect(() => {
     const onHashChange = () => {
       const fromHash = getHashId();
-      if (EXAMPLES.some(e => e.id === fromHash)) {
+      if (EXAMPLES.some((e) => e.id === fromHash)) {
         setActiveId(fromHash);
       }
     };
@@ -64,7 +70,7 @@ export default function App(): JSX.Element {
   }, []);
 
   const active = useMemo(
-    () => EXAMPLES.find(e => e.id === activeId) ?? EXAMPLES[0],
+    () => EXAMPLES.find((e) => e.id === activeId) ?? EXAMPLES[0],
     [activeId]
   );
 
@@ -77,9 +83,7 @@ export default function App(): JSX.Element {
           <div className="logo">⚛️</div>
           <div>
             <div className="brandTitle">React Hooks Playground</div>
-            <div className="brandSub">
-              Observe renders • Explain why
-            </div>
+            <div className="brandSub">Observe renders • Explain why</div>
           </div>
         </div>
 
@@ -95,7 +99,7 @@ export default function App(): JSX.Element {
           </div>
 
           <div className="list">
-            {EXAMPLES.map(ex => (
+            {EXAMPLES.map((ex) => (
               <button
                 key={ex.id}
                 className={`item ${ex.id === activeId ? "active" : ""}`}
